@@ -7,6 +7,8 @@ canvas.width = width;
 canvas.height = height;
 var ctx = canvas.getContext('2d');
 var qeue = [];
+var org = null;
+var dest = null;
 
 class Node {
     constructor(x, y, i, j){
@@ -19,6 +21,20 @@ class Node {
         this.parent = null;
     }
 }
+
+canvas.addEventListener('click', function(event){
+
+    if (event.button == 0 && org == null){
+        var i = Math.floor(event.y / blockSize);
+        var j = Math.floor(event.x / blockSize);
+        selectOrig(i,j);
+    }
+    else {
+        var i = Math.floor(event.y / blockSize);
+        var j = Math.floor(event.x / blockSize);
+        selectDest(i,j);
+    }
+}, false);
 
 ctx.fillStyle = '#0013ff';
 ctx.fillRect(0,0,width,height);
@@ -33,14 +49,7 @@ for(i = 0; i < 8; i++){
     }
 }
 
-findAndShowPath(matrix[1][0], matrix[6][7]);
-
-function findAndShowPath(org, dest) {
-
-    ctx.fillStyle = 'red';
-    ctx.fillRect(org.j * blockSize, org.i * blockSize, blockSize, blockSize);
-    ctx.fillStyle = 'orange';
-    ctx.fillRect(dest.j * blockSize, dest.i * blockSize, blockSize, blockSize);
+function findAndShowPath() {
     pushQ(org);
     while(qeue.length > 0 || dest.parent == null) {
 
@@ -77,34 +86,58 @@ function findAndShowPath(org, dest) {
         }
 
         qeue.shift();
-        
     }
     
     var next = dest.parent;
     var detrasfrente = [];
     detrasfrente.push(dest);
-    //console.log(dest);
 
     while (next != null) {
-        //TODO: monta array
         detrasfrente.push(next);
-        next = next.parent;
-        //console.log(next);        
+        next = next.parent;        
     }
 
     detrasfrente.push(org);
-    console.log(detrasfrente);
 
-    for(i = detrasfrente.length  - 1;  i >= 0; i--){
+    for(i = detrasfrente.length  - 3;  i > 0; i--) {
         ctx.fillStyle = 'purple';
         ctx.fillRect(detrasfrente[i].j * blockSize, detrasfrente[i].i * blockSize, blockSize, blockSize);
     }
-
-    //TODO: mostra graficamente
 }
 
-function popQ(element){
-    
+function drawAll(){
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(0,0,width,height);
+    for (i = 0; i < sizeMatrix; i++){
+        for (j = 0; j < sizeMatrix; j++){
+            ctx.strokeRect(i*blockSize, j*blockSize, blockSize,blockSize);
+        }
+    }
+
+    if (org != null){
+        ctx.fillStyle = 'red'
+        ctx.fillRect(org.x, org.y, blockSize, blockSize);
+    }
+
+    if (dest != null)
+    {
+        ctx.fillStyle = 'orange';
+        ctx.fillRect(dest.x, dest.y, blockSize, blockSize);
+    }
+}
+
+function selectOrig(i, j){
+    org = matrix[i][j];
+    drawAll();
+}
+
+function selectDest(i, j){
+    dest = matrix[i][j];
+    drawAll();
+    findAndShowPath();   
+    org = null;
+    dest = null;
+    qeue = [];
 }
 
 function pushQ(element){
