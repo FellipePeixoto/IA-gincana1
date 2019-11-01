@@ -25,7 +25,6 @@ class Node {
 }
 
 canvas.addEventListener('click', function(event){
-
     if (event.button == 0 && org == null){
         var i = Math.floor(event.y / blockSize);
         var j = Math.floor(event.x / blockSize);
@@ -143,6 +142,12 @@ function selectOrig(i, j){
 
 function selectDest(i, j){
     dest = matrix[i][j];
+    if (org == dest)
+    {
+        resetAll();
+        drawAll();
+        return;
+    }
     drawAll();
     findPath();
 	drawFunc = setInterval(showPath, delayToShow);
@@ -156,7 +161,7 @@ function resetAll(){
 	for (i = 0; i < sizeMatrix; i++){
 		for (j = 0; j < sizeMatrix; j++) {
 			matrix[i][j].parent = null;
-		}	
+		}
 	}
 }
 
