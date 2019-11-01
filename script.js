@@ -2,6 +2,7 @@ var width = 800;
 var height = 800;
 var blockSize = 100;
 var sizeMatrix = 8;
+var delayToShow = 50;
 var canvas = document.getElementById('canvas');
 canvas.width = width;
 canvas.height = height;
@@ -9,6 +10,7 @@ var ctx = canvas.getContext('2d');
 var qeue = [];
 var org = null;
 var dest = null;
+var drawFunc;
 
 class Node {
     constructor(x, y, i, j){
@@ -49,7 +51,7 @@ for(i = 0; i < 8; i++){
     }
 }
 
-function findAndShowPath() {
+function findPath() {
     pushQ(org);
     while(qeue.length > 0 || dest.parent == null) {
 
@@ -89,20 +91,28 @@ function findAndShowPath() {
     }
     
     var next = dest.parent;
-    var detrasfrente = [];
-    detrasfrente.push(dest);
+    qeue = [];
+    qeue.push(dest);
 
     while (next != null) {
-        detrasfrente.push(next);
+        qeue.push(next);
         next = next.parent;        
     }
+    qeue.pop();
+    qeue.shift();
+}
 
-    detrasfrente.push(org);
-
-    for(i = detrasfrente.length  - 3;  i > 0; i--) {
-        ctx.fillStyle = 'purple';
-        ctx.fillRect(detrasfrente[i].j * blockSize, detrasfrente[i].i * blockSize, blockSize, blockSize);
-    }
+function showPath(){
+	if (qeue.length < 1)
+	{
+		resetAll();
+		clearInterval(drawFunc);
+		return;
+	}
+	
+	ctx.fillStyle = 'purple';
+	ctx.fillRect(qeue[qeue.length - 1].j * blockSize, qeue[qeue.length - 1].i * blockSize, blockSize, blockSize);
+	qeue.pop();
 }
 
 function drawAll(){
@@ -134,10 +144,20 @@ function selectOrig(i, j){
 function selectDest(i, j){
     dest = matrix[i][j];
     drawAll();
-    findAndShowPath();   
-    org = null;
+    findPath();
+	drawFunc = setInterval(showPath, delayToShow);
+}
+
+function resetAll(){
+	org = null;
     dest = null;
     qeue = [];
+	
+	for (i = 0; i < sizeMatrix; i++){
+		for (j = 0; j < sizeMatrix; j++) {
+			matrix[i][j].parent = null;
+		}	
+	}
 }
 
 function pushQ(element){
